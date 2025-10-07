@@ -24,6 +24,7 @@
 
         .container {
             background: #111;
+            box-shadow: 15px 15px 15px rgba(165, 69, 189, 0.5), -20px -4px 20px rgba(234, 0, 255, 0.3);
             border: 1px solid #222;
             border-radius: 12px;
             max-width: 600px;
@@ -44,7 +45,7 @@
         }
 
         h1 {
-            color: #fff;
+            color: #cfa8f3;
             font-size: 2em;
             margin-bottom: 8px;
             font-weight: 600;
@@ -125,6 +126,18 @@
             padding: 24px;
             margin-bottom: 16px;
             position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .subject-card h4 {
@@ -176,6 +189,12 @@
             transform: scale(0.98);
         }
 
+        .btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
         .btn-secondary {
             background: #1a1a1a;
             color: #fff;
@@ -186,7 +205,16 @@
             background: #222;
             border-color: #444;
         }
-
+        #date_col{
+            background:white;
+            color:black;
+        }
+        #date_col:focus{
+            background:rgb(220, 178, 245);
+            color:rgb(82, 82, 82);
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition:all 0.3s ease-in;
+        }
         #results {
             margin-top: 32px;
             padding: 24px;
@@ -197,33 +225,61 @@
         }
 
         .day-block {
-            background: #111;
+            background: #ffffff;
             padding: 16px;
             border-radius: 6px;
             margin-bottom: 12px;
-            border-left: 2px solid #444;
+            border-left: 3px solid #444;
         }
 
         .day-title {
-            font-weight: 500;
+            font-weight: 600;
             color: #fff;
-            margin-bottom: 12px;
-            font-size: 0.9em;
+            margin-bottom: 8px;
+            font-size: 1em;
         }
 
         .time-slot {
             display: inline-block;
-            padding: 6px 12px;
+            padding: 8px 14px;
             margin: 4px 4px 4px 0;
             background: #2a2a2a;
             border-radius: 4px;
             font-size: 0.85em;
             color: #e5e5e5;
+            border: 1px solid #333;
+        }
+
+        .subject-tag {
+            background: #1e1e1e;
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .urgent-tag {
+            background: #2a0a0a;
+            color: #ff6b6b;
+            border: 1px solid #441111;
+            font-weight: 600;
+        }
+
+        .high-priority-tag {
+            background: #1a1a0a;
+            color: #ffa500;
+            border: 1px solid #332211;
+            font-weight: 600;
+        }
+
+        .break-slot {
+            background: #0a1a0a;
+            color: #6b6;
+            border: 1px solid #1a3a1a;
         }
 
         .free-slot {
             background: #1a1a1a;
             color: #666;
+            border: 1px solid #2a2a2a;
         }
 
         .error {
@@ -233,6 +289,16 @@
             border-radius: 6px;
             margin-top: 20px;
             border: 1px solid #331111;
+            font-size: 0.9em;
+        }
+
+        .warning {
+            background: #1a1a0a;
+            color: #ffa500;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #332211;
             font-size: 0.9em;
         }
 
@@ -257,6 +323,32 @@
             font-size: 1.1em;
         }
 
+        .summary {
+            background: #1a1a1a;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        .summary-item strong {
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 24px;
@@ -279,292 +371,311 @@
 
         <div class="section">
             <div class="section-title">Configuration</div>
-            <div class="grid-2">
-                <div class="input-group">
-                    <label>Number of days</label>
-                    <input type="number" id="days" min="1" value="7" placeholder="7">
-                </div>
-                <div class="input-group">
-                    <label>Hours per day</label>
-                    <input type="number" id="hoursPerDay" min="1" value="4" placeholder="4">
-                </div>
+            <div class="input-group">
+                <label>Daily study limit (hours)</label>
+                <input type="number" id="hoursPerDay" min="1" max="24" value="4" placeholder="4">
+            </div>
+            <div class="input-group">
+                <label>Break time per session (minutes)</label>
+                <input type="number" id="breakTime" min="0" max="60" step="5" value="15" placeholder="15">
             </div>
             <div class="checkbox-group">
                 <input type="checkbox" id="allowUnderfill">
-                <label for="allowUnderfill" style="margin: 0;">Allow flexible scheduling</label>
+                <label for="allowUnderfill" style="margin: 0;">Allow flexible scheduling (underfill days if needed)</label>
             </div>
         </div>
 
         <div class="section">
             <div class="section-title">Subjects</div>
-            <div id="subjectsList"></div>
-            <button class="btn btn-secondary" onclick="addSubject()">Add Subject</button>
+            <div id="subjectsList">
+                <div class="empty-state">Click "Add Subject" to get started</div>
+            </div>
+            <button class="btn btn-secondary" onclick="addSubject()">+ Add Subject</button>
         </div>
 
         <button class="btn" onclick="generatePlan()"><b>Generate Schedule</b></button>
-
+        date_col
         <div id="loading" class="loading" style="display: none;">Processing schedule...</div>
         <div id="results"></div>
     </div>
 
     <script>
         let subjectCount = 0;
-        const subjects = {};
+        const activeSubjects = new Set();
 
         function addSubject() {
             subjectCount++;
             const id = `subject_${subjectCount}`;
+            activeSubjects.add(id);
+            
+            const emptyState = document.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
             
             const card = document.createElement('div');
             card.className = 'subject-card';
             card.id = id;
             card.innerHTML = `
-                <button class="remove-btn" onclick="removeSubject('${id}')">×</button>
+                <button class="remove-btn" onclick="removeSubject('${id}')" title="Remove subject">×</button>
                 <h4>Subject ${subjectCount}</h4>
                 <div class="input-group">
                     <label>Name</label>
-                    <input type="text" id="${id}_name" placeholder="Mathematics">
-                </div>
-                <div class="grid-2">
-                    <div class="input-group">
-                        <label>Hours needed</label>
-                        <input type="number" id="${id}_hours" min="1" value="5" placeholder="5">
-                    </div>
-                    <div class="input-group">
-                        <label>Deadline (day)</label>
-                        <input type="number" id="${id}_deadline" min="1" value="${document.getElementById('days').value}" placeholder="7">
-                    </div>
+                    <input type="text" id="${id}_name" placeholder="e.g. Mathematics, Physics">
                 </div>
                 <div class="input-group">
-                    <label>Priority (1-10)</label>
-                    <input type="number" id="${id}_priority" min="1" max="10" value="5" placeholder="5">
+                    <label>Study Time (hours)</label>
+                    <input type="number" id="${id}_hours" min="0.5" step="0.5" value="2" placeholder="2">
+                </div>
+                <div class="input-group">
+                    <label>Deadline (date)</label>
+                    <input id="date_col" type="date" id="${id}_deadline">
                 </div>
             `;
             
             document.getElementById('subjectsList').appendChild(card);
-            subjects[id] = true;
         }
 
         function removeSubject(id) {
-            document.getElementById(id).remove();
-            delete subjects[id];
-        }
-
-        addSubject();
-
-        function collectSubjects() {
-            const subjectData = [];
-            for (const id in subjects) {
-                const name = document.getElementById(`${id}_name`).value || `Subject ${id.split('_')[1]}`;
-                const hours = parseInt(document.getElementById(`${id}_hours`).value) || 0;
-                const deadline = parseInt(document.getElementById(`${id}_deadline`).value) || 1;
-                const priority = parseInt(document.getElementById(`${id}_priority`).value) || 5;
-                
-                subjectData.push({
-                    id: name,
-                    hours_required: hours,
-                    deadline_day: deadline,
-                    priority: priority
-                });
-            }
-            return subjectData;
+            activeSubjects.delete(id);
+            const element = document.getElementById(id);
+            element.style.opacity = '0';
+            element.style.transform = 'translateX(-20px)';
+            setTimeout(() => {
+                element.remove();
+                if (activeSubjects.size === 0) {
+                    document.getElementById('subjectsList').innerHTML = '<div class="empty-state">Click "Add Subject" to get started</div>';
+                }
+            }, 200);
         }
 
         function generatePlan() {
-            const days = parseInt(document.getElementById('days').value);
             const hoursPerDay = parseInt(document.getElementById('hoursPerDay').value);
+            const breakTime = parseInt(document.getElementById('breakTime').value) || 0;
             const allowUnderfill = document.getElementById('allowUnderfill').checked;
-            const subjectData = collectSubjects();
 
-            if (!days || !hoursPerDay) {
-                alert('Please fill in days and hours per day');
+            const subjectsList = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            activeSubjects.forEach(id => {
+                const nameElement = document.getElementById(`${id}_name`);
+                const hoursElement = document.getElementById(`${id}_hours`);
+                const deadlineElement = document.getElementById(`${id}_deadline`);
+                
+                if (nameElement && hoursElement && deadlineElement) {
+                    const subjectName = nameElement.value.trim();
+                    const subjectHours = parseFloat(hoursElement.value);
+                    const deadlineValue = deadlineElement.value;
+
+                    if (subjectName && subjectHours > 0 && deadlineValue) {
+                        const deadline = new Date(deadlineValue);
+                        deadline.setHours(0, 0, 0, 0);
+                        const daysUntilDeadline = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+                        
+                        subjectsList.push({ 
+                            name: subjectName, 
+                            hours: subjectHours,
+                            deadline: daysUntilDeadline,
+                            deadlineDate: deadlineValue
+                        });
+                    }
+                }
+            });
+
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+            resultsContainer.style.display = 'none';
+
+            if (subjectsList.length === 0) {
+                resultsContainer.style.display = 'block';
+                resultsContainer.innerHTML = '<div class="error">Please add at least one subject with a name, hours, and deadline.</div>';
                 return;
             }
 
-            if (subjectData.length === 0) {
-                alert('Please add at least one subject');
+            if (!hoursPerDay || hoursPerDay < 1) {
+                resultsContainer.style.display = 'block';
+                resultsContainer.innerHTML = '<div class="error">Please enter valid daily study limit (minimum 1 hour).</div>';
                 return;
             }
+
+            // Check for overdue or invalid deadlines
+            const overdueSubjects = subjectsList.filter(s => s.deadline < 0);
+            if (overdueSubjects.length > 0) {
+                resultsContainer.style.display = 'block';
+                resultsContainer.innerHTML = '<div class="error">Some subjects have deadlines in the past. Please update them to future dates.</div>';
+                return;
+            }
+
+            const totalStudyTime = subjectsList.reduce((acc, subject) => acc + subject.hours, 0);
+            const maxDeadline = Math.max(...subjectsList.map(s => s.deadline));
+            const days = maxDeadline + 1;
+            const totalAvailableTime = days * hoursPerDay;
 
             document.getElementById('loading').style.display = 'block';
-            document.getElementById('results').style.display = 'none';
 
             setTimeout(() => {
-                const plan = runCSPSolver(days, hoursPerDay, subjectData, allowUnderfill);
-                displayResults(plan);
                 document.getElementById('loading').style.display = 'none';
-            }, 100);
-        }
+                resultsContainer.style.display = 'block';
 
-        // Optimized CSP Solver with forward checking and MRV heuristic
-        function runCSPSolver(days, hoursPerDay, subjects, allowUnderfill) {
-            // Sort subjects by priority and deadline for better allocation
-            subjects.sort((a, b) => {
-                if (a.deadline_day !== b.deadline_day) {
-                    return a.deadline_day - b.deadline_day;
-                }
-                return b.priority - a.priority;
-            });
-
-            const slots = [];
-            for (let d = 1; d <= days; d++) {
-                for (let h = 1; h <= hoursPerDay; h++) {
-                    slots.push([d, h]);
-                }
-            }
-
-            const state = {
-                remaining: {},
-                meta: {},
-                allowUnderfill: allowUnderfill
-            };
-
-            subjects.forEach(s => {
-                state.remaining[s.id] = s.hours_required;
-                state.meta[s.id] = s;
-            });
-
-            // Initialize domains with precomputed legal values
-            const domains = new Map();
-            slots.forEach(slot => {
-                const key = `${slot[0]},${slot[1]}`;
-                domains.set(key, getLegalValues(slot, state));
-            });
-
-            const solution = cspBacktrack(
-                new Map(), 
-                slots, 
-                domains, 
-                { ...state, remaining: { ...state.remaining } }
-            );
-
-            if (!solution) return null;
-
-            const plan = {};
-            solution.forEach((subj, key) => {
-                const [d] = key.split(',').map(Number);
-                const dayKey = `Day ${d}`;
-                if (!plan[dayKey]) plan[dayKey] = [];
-                plan[dayKey].push(subj);
-            });
-
-            return plan;
-        }
-
-        function getLegalValues(slot, state) {
-            const [d] = slot;
-            const vals = [];
-            
-            for (const [subj, meta] of Object.entries(state.meta)) {
-                if (meta.deadline_day && d > meta.deadline_day) continue;
-                if (state.remaining[subj] <= 0) continue;
-                vals.push(subj);
-            }
-            vals.push('FREE');
-            return vals;
-        }
-
-        function cspBacktrack(assignments, unassigned, domains, state, depth = 0) {
-            if (depth > 500) return null;
-            
-            if (unassigned.length === 0) {
-                const satisfied = Object.values(state.remaining).every(v => 
-                    state.allowUnderfill || v <= 0
-                );
-                return satisfied ? assignments : null;
-            }
-
-            // MRV heuristic: choose slot with fewest legal values
-            let minIdx = 0;
-            let minDomain = Infinity;
-            
-            for (let i = 0; i < Math.min(10, unassigned.length); i++) {
-                const slot = unassigned[i];
-                const key = `${slot[0]},${slot[1]}`;
-                const domain = domains.get(key);
-                const legalVals = domain.filter(val => {
-                    if (val === 'FREE') return true;
-                    return state.remaining[val] > 0;
-                });
-                
-                if (legalVals.length < minDomain) {
-                    minDomain = legalVals.length;
-                    minIdx = i;
-                }
-            }
-
-            const varSlot = unassigned[minIdx];
-            const key = `${varSlot[0]},${varSlot[1]}`;
-            const domain = domains.get(key) || [];
-
-            // Try high-priority subjects first
-            const sortedDomain = domain.filter(val => {
-                if (val === 'FREE') return true;
-                return state.remaining[val] > 0;
-            }).sort((a, b) => {
-                if (a === 'FREE') return 1;
-                if (b === 'FREE') return -1;
-                const priorityA = state.meta[a]?.priority || 0;
-                const priorityB = state.meta[b]?.priority || 0;
-                return priorityB - priorityA;
-            });
-
-            for (const val of sortedDomain) {
-                if (val !== 'FREE' && state.remaining[val] <= 0) continue;
-                
-                const newRemaining = { ...state.remaining };
-                if (val !== 'FREE') {
-                    newRemaining[val]--;
-                    if (newRemaining[val] < 0 && !state.allowUnderfill) continue;
+                if (totalStudyTime > totalAvailableTime && !allowUnderfill) {
+                    resultsContainer.innerHTML = `
+                        <div class="error">
+                            <strong>Not enough time!</strong><br>
+                            Total study hours needed: ${totalStudyTime}h<br>
+                            Available time: ${totalAvailableTime}h<br><br>
+                            Either increase days/hours, reduce subject hours, or enable flexible scheduling.
+                        </div>
+                    `;
+                    return;
                 }
 
-                const newAssignments = new Map(assignments);
-                newAssignments.set(key, val);
-                
-                const newUnassigned = [...unassigned.slice(0, minIdx), ...unassigned.slice(minIdx + 1)];
-                const newState = { ...state, remaining: newRemaining };
+                let html = '<div class="success-title">Your Study Schedule</div>';
 
-                const result = cspBacktrack(newAssignments, newUnassigned, domains, newState, depth + 1);
-                if (result) return result;
-            }
-
-            return null;
-        }
-
-        function displayResults(plan) {
-            const resultsDiv = document.getElementById('results');
-            
-            if (!plan) {
-                resultsDiv.innerHTML = `<div class="error">Unable to generate a valid schedule<br><br>Suggestions:<br>• Increase the number of days<br>• Reduce total hours required<br>• Enable flexible scheduling<br>• Adjust subject deadlines</div>`;
-                resultsDiv.style.display = 'block';
-                return;
-            }
-
-            let html = '<div class="success-title">Schedule Generated</div>';
-            
-            const sortedDays = Object.keys(plan).sort((a, b) => {
-                const numA = parseInt(a.split(' ')[1]);
-                const numB = parseInt(b.split(' ')[1]);
-                return numA - numB;
-            });
-
-            sortedDays.forEach(day => {
-                const slots = plan[day];
-                html += `<div class="day-block">
-                    <div class="day-title">${day}</div>`;
-                
-                slots.forEach((slot, idx) => {
-                    const className = slot === 'FREE' ? 'time-slot free-slot' : 'time-slot';
-                    const label = slot === 'FREE' ? 'Break' : slot;
-                    html += `<span class="${className}">${label}</span>`;
-                });
-                
+                html += '<div class="summary">';
+                html += `<div class="summary-item"><span>Total subjects:</span><strong>${subjectsList.length}</strong></div>`;
+                html += `<div class="summary-item"><span>Schedule duration:</span><strong>${days} days</strong></div>`;
+                html += `<div class="summary-item"><span>Daily limit:</span><strong>${hoursPerDay}h</strong></div>`;
+                html += `<div class="summary-item"><span>Break per session:</span><strong>${breakTime} min</strong></div>`;
+                html += `<div class="summary-item"><span>Total hours needed:</span><strong>${totalStudyTime}h</strong></div>`;
+                html += `<div class="summary-item"><span>Available time:</span><strong>${totalAvailableTime}h</strong></div>`;
                 html += '</div>';
-            });
 
-            resultsDiv.innerHTML = html;
-            resultsDiv.style.display = 'block';
+                if (totalStudyTime < totalAvailableTime) {
+                    html += `<div class="warning">You have ${(totalAvailableTime - totalStudyTime).toFixed(1)} hours of buffer time available.</div>`;
+                }
+
+                const schedule = distributeStudyTime(subjectsList, days, hoursPerDay, allowUnderfill, breakTime);
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                schedule.forEach((day, index) => {
+                    const currentDate = new Date(today);
+                    currentDate.setDate(today.getDate() + index);
+                    const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    
+                    html += `<div class="day-block">`;
+                    html += `<div class="day-title">Day ${index + 1} - ${dateStr}</div>`;
+                    
+                    if (day.length === 0) {
+                        html += `<span class="time-slot free-slot">Free day</span>`;
+                    } else {
+                        day.forEach((slot, slotIndex) => {
+                            const daysTillDeadline = slot.deadline - index;
+                            let priorityClass = 'subject-tag';
+                            let deadlineInfo = '';
+                            
+                            if (daysTillDeadline <= 1) {
+                                priorityClass = 'urgent-tag';
+                                deadlineInfo = ' 🔥';
+                            } else if (daysTillDeadline <= 3) {
+                                priorityClass = 'high-priority-tag';
+                                deadlineInfo = ' ⚠️';
+                            }
+                            
+                            html += `<span class="time-slot ${priorityClass}">${slot.subject}: ${slot.hours}h${deadlineInfo}</span>`;
+                            if (slotIndex < day.length - 1 && breakTime > 0) {
+                                html += `<span class="time-slot break-slot">Break: ${breakTime} min</span>`;
+                            }
+                        });
+                        
+                        const dayTotal = day.reduce((sum, slot) => sum + slot.hours, 0);
+                        if (dayTotal < hoursPerDay) {
+                            html += `<span class="time-slot free-slot">Free: ${(hoursPerDay - dayTotal).toFixed(1)}h</span>`;
+                        }
+                    }
+                    
+                    html += `</div>`;
+                });
+
+                resultsContainer.innerHTML = html;
+            }, 800);
         }
+
+        function distributeStudyTime(subjects, days, hoursPerDay, allowUnderfill, breakTime) {
+            const schedule = Array.from({ length: days }, () => []);
+            
+            // Calculate priority score: hours_needed / days_until_deadline (higher = more urgent)
+            const prioritizedSubjects = subjects.map(subject => ({
+                ...subject,
+                priorityScore: subject.hours / Math.max(subject.deadline, 1),
+                dailyTarget: subject.hours / Math.max(subject.deadline, 1)
+            })).sort((a, b) => b.priorityScore - a.priorityScore);
+            
+            // Track remaining hours for each subject
+            const remaining = {};
+            prioritizedSubjects.forEach(s => {
+                remaining[s.name] = s.hours;
+            });
+            
+            // Fill schedule day by day
+            for (let day = 0; day < days; day++) {
+                let dayHoursUsed = 0;
+                
+                // Get subjects that haven't reached their deadline yet
+                const activeSubjects = prioritizedSubjects
+                    .filter(s => remaining[s.name] > 0 && day < s.deadline)
+                    .sort((a, b) => {
+                        // Recalculate urgency based on remaining hours and remaining days
+                        const daysLeftA = a.deadline - day;
+                        const daysLeftB = b.deadline - day;
+                        const urgencyA = remaining[a.name] / Math.max(daysLeftA, 0.5);
+                        const urgencyB = remaining[b.name] / Math.max(daysLeftB, 0.5);
+                        return urgencyB - urgencyA;
+                    });
+                
+                // Allocate hours to subjects based on urgency
+                for (const subject of activeSubjects) {
+                    if (dayHoursUsed >= hoursPerDay) break;
+                    
+                    const availableHours = hoursPerDay - dayHoursUsed;
+                    const daysLeft = Math.max(subject.deadline - day, 1);
+                    const idealHoursToday = remaining[subject.name] / daysLeft;
+                    const hoursToAllocate = Math.min(
+                        remaining[subject.name],
+                        availableHours,
+                        Math.max(idealHoursToday, 0.5) // At least 0.5 hours per session
+                    );
+                    
+                    if (hoursToAllocate > 0) {
+                        schedule[day].push({
+                            subject: subject.name,
+                            hours: parseFloat(hoursToAllocate.toFixed(1)),
+                            deadline: subject.deadline
+                        });
+                        remaining[subject.name] -= hoursToAllocate;
+                        dayHoursUsed += hoursToAllocate;
+                    }
+                }
+                
+                // Handle any subjects past their deadline but still have remaining hours
+                const overdueSubjects = prioritizedSubjects
+                    .filter(s => remaining[s.name] > 0 && day >= s.deadline)
+                    .sort((a, b) => a.deadline - b.deadline); // Earlier deadline first
+                
+                for (const subject of overdueSubjects) {
+                    if (dayHoursUsed >= hoursPerDay) break;
+                    
+                    const availableHours = hoursPerDay - dayHoursUsed;
+                    const hoursToAllocate = Math.min(remaining[subject.name], availableHours);
+                    
+                    if (hoursToAllocate > 0) {
+                        schedule[day].push({
+                            subject: subject.name,
+                            hours: parseFloat(hoursToAllocate.toFixed(1)),
+                            deadline: subject.deadline
+                        });
+                        remaining[subject.name] -= hoursToAllocate;
+                        dayHoursUsed += hoursToAllocate;
+                    }
+                }
+            }
+            
+            return schedule;
+        }
+
+        addSubject();
     </script>
 </body>
 </html>
